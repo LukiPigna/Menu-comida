@@ -26,7 +26,7 @@ const WhatsAppMessagePreview: React.FC<{ template: string, restaurantName: strin
 
 const RestaurantSettings: React.FC = () => {
     const { config, updateConfig, showToast } = useAppContext();
-    const [formData, setFormData] = useState(config);
+    const [formData, setFormData] = useState<RestaurantConfig | null>(config);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
@@ -35,21 +35,34 @@ const RestaurantSettings: React.FC = () => {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        setFormData(prev => {
+            if (!prev) return null;
+            return {
+                ...prev,
+                [name]: value
+            }
+        });
+    };
+    
+     const handleAlignmentChange = (alignment: 'left' | 'center') => {
+        setFormData(prev => {
+            if (!prev) return null;
+            return { ...prev, headerTextAlignment: alignment };
+        });
     };
 
     const handleThemeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            theme: {
-                ...prev.theme,
-                [name]: value,
+        setFormData(prev => {
+            if (!prev) return null;
+            return {
+                ...prev,
+                theme: {
+                    ...prev.theme,
+                    [name]: value,
+                }
             }
-        }));
+        });
     };
     
     const handleInsertPlaceholder = (placeholder: string) => {
@@ -60,7 +73,10 @@ const RestaurantSettings: React.FC = () => {
         const text = textarea.value;
         const newText = text.substring(0, start) + placeholder + text.substring(end);
         
-        setFormData(prev => ({ ...prev, whatsappMessageTemplate: newText }));
+        setFormData(prev => {
+            if (!prev) return null;
+            return { ...prev, whatsappMessageTemplate: newText };
+        });
         
         // Focus and set cursor position after insertion
         setTimeout(() => {
@@ -71,8 +87,10 @@ const RestaurantSettings: React.FC = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        updateConfig(formData);
-        showToast('✓ Ajustes guardados correctamente');
+        if (formData) {
+            updateConfig(formData);
+            showToast('✓ Ajustes guardados correctamente');
+        }
     };
     
     if (!formData) return null;
@@ -86,8 +104,8 @@ const RestaurantSettings: React.FC = () => {
     ];
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-8">
-            <div>
+        <form onSubmit={handleSubmit} className="space-y-8 divide-y divide-gray-200">
+            <div className="pt-8">
                 <h3 className="text-xl font-bold text-gray-800 mb-4">Información General</h3>
                 <div className="space-y-4">
                     <div>
@@ -118,8 +136,37 @@ const RestaurantSettings: React.FC = () => {
                     </div>
                 </div>
             </div>
+            
+             <div className="pt-8">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">Personalización de la Cabecera</h3>
+                <div className="space-y-4">
+                    <div>
+                        <label htmlFor="logoUrl" className="block text-sm font-medium text-gray-700">URL del Logo (Opcional)</label>
+                        <input
+                            type="text"
+                            id="logoUrl"
+                            name="logoUrl"
+                            value={formData.logoUrl}
+                            onChange={handleChange}
+                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                            placeholder="https://ejemplo.com/logo.png"
+                        />
+                    </div>
+                    <div>
+                         <label className="block text-sm font-medium text-gray-700">Alineación</label>
+                         <div className="mt-2 grid grid-cols-2 gap-3">
+                            <button type="button" onClick={() => handleAlignmentChange('left')} className={`p-3 border rounded-lg text-sm font-semibold transition-colors ${formData.headerTextAlignment === 'left' ? 'bg-primary-50 border-primary-500 ring-2 ring-primary-500' : 'border-base-300 hover:bg-base-100'}`}>
+                                Izquierda
+                            </button>
+                            <button type="button" onClick={() => handleAlignmentChange('center')} className={`p-3 border rounded-lg text-sm font-semibold transition-colors ${formData.headerTextAlignment === 'center' ? 'bg-primary-50 border-primary-500 ring-2 ring-primary-500' : 'border-base-300 hover:bg-base-100'}`}>
+                                Centro
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            <div className="border-t pt-8">
+            <div className="pt-8">
                 <h3 className="text-xl font-bold text-gray-800 mb-4">Plantilla de Mensaje de WhatsApp</h3>
                  <div>
                     <label htmlFor="whatsappMessageTemplate" className="block text-sm font-medium text-gray-700">Editor de Mensaje</label>
@@ -152,7 +199,7 @@ const RestaurantSettings: React.FC = () => {
                  </div>
             </div>
 
-            <div className="border-t pt-8">
+            <div className="pt-8">
                 <h3 className="text-xl font-bold text-gray-800 mb-4">Personalización de Colores</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="flex items-center space-x-4">
@@ -181,7 +228,7 @@ const RestaurantSettings: React.FC = () => {
                  <p className="text-xs text-gray-500 mt-2">La aplicación se actualizará en tiempo real a medida que cambies los colores.</p>
             </div>
             
-            <div className="flex justify-end pt-6 border-t">
+            <div className="flex justify-end pt-6">
                 <button
                     type="submit"
                     className="bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 px-6 rounded-lg transition"

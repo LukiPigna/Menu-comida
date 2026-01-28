@@ -9,16 +9,27 @@ const Header: React.FC = () => {
     const { cartCount, config } = useAppContext();
     const [isCartOpen, setIsCartOpen] = useState(false);
 
+    const isCentered = config?.headerTextAlignment === 'center';
+
     return (
         <>
             <header className="bg-base-50/80 backdrop-blur-lg sticky top-0 z-40 border-b border-base-200">
                 <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-                    <Link to="/" className="text-3xl font-serif text-content-dark hover:text-primary-700 transition-colors">
-                        {config?.name || 'Menú Digital'}
-                    </Link>
+                    {/* Espaciador para balancear el botón del carrito en modo centrado */}
+                    <div className={`${isCentered ? 'w-10' : ''}`} />
+                    
+                    <div className={`flex-1 flex ${isCentered ? 'justify-center' : 'justify-start'}`}>
+                        <Link to="/" className="inline-flex items-center text-3xl font-serif text-content-dark hover:text-primary-700 transition-colors">
+                            {config?.logoUrl && (
+                                <img src={config.logoUrl} alt={`${config.name} logo`} className="h-10 mr-3" />
+                            )}
+                            {config?.name || 'Menú Digital'}
+                        </Link>
+                    </div>
+
                     <button
                         onClick={() => setIsCartOpen(true)}
-                        className="relative text-content hover:text-primary-600 transition-colors"
+                        className="relative text-content hover:text-primary-600 transition-colors w-10 flex justify-end"
                         aria-label="Abrir carrito"
                     >
                         <ShoppingCartIcon />
