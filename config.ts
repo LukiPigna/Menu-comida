@@ -11,6 +11,7 @@ import type { MenuItem } from './types';
 export interface RestaurantConfig {
   name: string;
   whatsappNumber: string;
+  adminPassword?: string; // La contraseña es ahora parte de la configuración
   theme: {
     'primary-50': string;
     'primary-100': string;
@@ -55,7 +56,7 @@ export const defaultRestaurantConfig: RestaurantConfig = {
         category: 'Principales', 
         imageUrl: 'https://picsum.photos/id/1060/400/300',
     },
-    { id: '2', name: 'Pizza de Ejemplo', description: 'Usa la contraseña "admin123" para ingresar.', price: 10.00, category: 'Principales', imageUrl: 'https://picsum.photos/id/292/400/300' },
+    { id: '2', name: 'Pizza de Ejemplo', description: 'Usa la contraseña que creaste para ingresar.', price: 10.00, category: 'Principales', imageUrl: 'https://picsum.photos/id/292/400/300' },
     { id: '3', name: 'Ensalada de Ejemplo', description: 'Puedes cambiar los colores y el logo.', price: 7.00, category: 'Entradas', imageUrl: 'https://picsum.photos/id/201/400/300' },
   ]
 };

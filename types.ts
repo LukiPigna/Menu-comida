@@ -24,3 +24,6 @@ export interface CartItem extends MenuItem {
   quantity: number;
   selectedOptions?: { title: string; choice: string }[];
 }
+
+// Interfaz exportada para ser usada en el contexto
+export type { RestaurantConfig } from './config';

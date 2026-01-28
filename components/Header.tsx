@@ -14,7 +14,7 @@ const Header: React.FC = () => {
             <header className="bg-base-50/80 backdrop-blur-lg sticky top-0 z-40 border-b border-base-200">
                 <div className="container mx-auto px-4 py-4 flex justify-between items-center">
                     <Link to="/" className="text-3xl font-serif text-content-dark hover:text-primary-700 transition-colors">
-                        {config.name}
+                        {config?.name || 'Menú Digital'}
                     </Link>
                     <button
                         onClick={() => setIsCartOpen(true)}

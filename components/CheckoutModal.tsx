@@ -36,7 +36,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onOrderS
     };
 
     const handleConfirmOrder = () => {
-        if (!validateForm()) return;
+        if (!validateForm() || !config) return;
 
         const paymentMethodText = {
             cash: 'Efectivo',

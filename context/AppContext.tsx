@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from 'react';
 import type { MenuItem, CartItem } from '../types';
 import type { RestaurantConfig } from '../config';
-import { ADMIN_PASSWORD, LOCAL_STORAGE_MENU_KEY, LOCAL_STORAGE_CART_KEY, LOCAL_STORAGE_CONFIG_KEY } from '../constants';
+import { LOCAL_STORAGE_MENU_KEY, LOCAL_STORAGE_CART_KEY, LOCAL_STORAGE_CONFIG_KEY } from '../constants';
 import useLocalStorage from '../hooks/useLocalStorage';
 import { defaultRestaurantConfig } from '../config';
 
@@ -15,7 +15,8 @@ const applyTheme = (theme: RestaurantConfig['theme']) => {
 };
 
 interface AppContextType {
-    config: RestaurantConfig;
+    config: RestaurantConfig | null;
+    initializeConfig: (data: Pick<RestaurantConfig, 'name' | 'whatsappNumber' | 'adminPassword'>) => void;
     updateConfig: (newConfig: Partial<RestaurantConfig>) => void;
     menuItems: MenuItem[];
     cartItems: CartItem[];
@@ -40,23 +41,38 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [config, setConfig] = useLocalStorage<RestaurantConfig>(LOCAL_STORAGE_CONFIG_KEY, defaultRestaurantConfig);
-    const [menuItems, setMenuItems] = useLocalStorage<MenuItem[]>(LOCAL_STORAGE_MENU_KEY, config.menu);
+    const [config, setConfig] = useLocalStorage<RestaurantConfig | null>(LOCAL_STORAGE_CONFIG_KEY, null);
+    const [menuItems, setMenuItems] = useLocalStorage<MenuItem[]>(LOCAL_STORAGE_MENU_KEY, config?.menu || []);
     const [cartItems, setCartItems] = useLocalStorage<CartItem[]>(LOCAL_STORAGE_CART_KEY, []);
     const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [isToastVisible, setIsToastVisible] = useState(false);
 
-    // Aplicar tema y título al cargar y cuando la configuración cambia
     useEffect(() => {
-        applyTheme(config.theme);
-        document.title = `${config.name} - Menú Digital`;
+        if (config) {
+            applyTheme(config.theme);
+            document.title = `${config.name} - Menú Digital`;
+        } else {
+            document.title = 'Configura tu Menú Digital';
+        }
     }, [config]);
+
+    const initializeConfig = (data: Pick<RestaurantConfig, 'name' | 'whatsappNumber' | 'adminPassword'>) => {
+        const newConfig: RestaurantConfig = {
+            ...defaultRestaurantConfig,
+            name: data.name,
+            whatsappNumber: data.whatsappNumber,
+            adminPassword: data.adminPassword
+        };
+        setConfig(newConfig);
+        setMenuItems(newConfig.menu);
+        setIsAdminAuthenticated(true); // Auto-login after setup
+    };
 
     const updateConfig = (newConfig: Partial<RestaurantConfig>) => {
         setConfig(prev => {
+            if (!prev) return null;
             const updatedConfig = { ...prev, ...newConfig };
-            // Si el menú cambia en la configuración, actualizamos también el estado del menú
             if (newConfig.menu) {
                 setMenuItems(newConfig.menu);
             }
@@ -73,7 +89,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }, []);
 
     const login = (password: string): boolean => {
-        if (password === ADMIN_PASSWORD) {
+        if (config && password === config.adminPassword) {
             setIsAdminAuthenticated(true);
             return true;
         }
@@ -99,24 +115,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setCartItems(prev => {
             const optionsString = selectedOptions ? JSON.stringify(selectedOptions.sort((a, b) => a.title.localeCompare(b.title))) : 'default';
             const cartId = `${item.id}-${optionsString}`;
-            
             const existingItem = prev.find(cartItem => cartItem.cartId === cartId);
-
             if (existingItem) {
                 return prev.map(cartItem =>
                     cartItem.cartId === cartId ? { ...cartItem, quantity: cartItem.quantity + 1 } : cartItem
                 );
             }
-
             const newCartItem: CartItem = { ...item, cartId, quantity: 1, selectedOptions };
             return [...prev, newCartItem];
         });
         showToast(`✓ ${item.name} añadido`);
     }, [showToast]);
 
-    const removeFromCart = useCallback((cartId: string) => {
-        setCartItems(prev => prev.filter(item => item.cartId !== cartId));
-    }, []);
+    const removeFromCart = useCallback((cartId: string) => setCartItems(prev => prev.filter(item => item.cartId !== cartId)), []);
 
     const updateCartItemQuantity = useCallback((cartId: string, quantity: number) => {
         if (quantity <= 0) {
@@ -126,10 +137,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
     }, [removeFromCart]);
 
-    const getCartItemByMenuId = useCallback((menuId: string): CartItem | undefined => {
-        return cartItems.find(item => item.id === menuId);
-    }, [cartItems]);
-
+    const getCartItemByMenuId = useCallback((menuId: string): CartItem | undefined => cartItems.find(item => item.id === menuId), [cartItems]);
+    
     const clearCart = () => setCartItems([]);
 
     const cartTotal = useMemo(() => cartItems.reduce((total, item) => total + item.price * item.quantity, 0), [cartItems]);
@@ -137,6 +146,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const value = {
         config,
+        initializeConfig,
         updateConfig,
         menuItems,
         cartItems,
