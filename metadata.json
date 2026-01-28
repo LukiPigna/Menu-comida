@@ -1,0 +1,5 @@
+{
+  "name": "Menú Digital Minimalista",
+  "description": "Una aplicación de menú de restaurante profesional y minimalista que permite a los clientes ver la carta, agregar artículos a un carrito y realizar pedidos a través de WhatsApp. Incluye un panel de administración seguro para que los propietarios de restaurantes administren el menú.",
+  "requestFramePermissions": []
+}
