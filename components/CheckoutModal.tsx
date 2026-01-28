@@ -53,9 +53,14 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onOrderS
                 return `- ${item.quantity}x ${item.name}${optionsText ? ` (${optionsText})` : ''} ($${(item.price * item.quantity).toFixed(2)})`;
             }).join('\n');
             
-        const notesSection = notes.trim() ? `\n\n*NOTAS ADICIONALES:*\n${notes.trim()}` : '';
+        const notesSection = notes.trim() ? `*NOTAS ADICIONALES:*\n${notes.trim()}` : '';
 
-        const message = `¡Hola ${config.name}! Quisiera hacer el siguiente pedido:\n\n${customerData}\n\n${orderSummary}${notesSection}\n\n*Total: $${cartTotal.toFixed(2)}*`;
+        const message = config.whatsappMessageTemplate
+            .replace('{{RESTAURANT_NAME}}', config.name)
+            .replace('{{DATOS_CLIENTE}}', customerData)
+            .replace('{{RESUMEN_PEDIDO}}', orderSummary)
+            .replace('{{NOTAS}}', notesSection)
+            .replace('{{TOTAL}}', `$${cartTotal.toFixed(2)}`);
 
         const whatsappUrl = `https://wa.me/${config.whatsappNumber}?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');

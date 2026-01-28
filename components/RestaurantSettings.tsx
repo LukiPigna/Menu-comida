@@ -11,7 +11,7 @@ const RestaurantSettings: React.FC = () => {
         setFormData(config);
     }, [config]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
@@ -35,6 +35,8 @@ const RestaurantSettings: React.FC = () => {
         updateConfig(formData);
         showToast('✓ Ajustes guardados correctamente');
     };
+    
+    if (!formData) return null;
 
     return (
         <form onSubmit={handleSubmit} className="space-y-8">
@@ -68,6 +70,26 @@ const RestaurantSettings: React.FC = () => {
                          <p className="text-xs text-gray-500 mt-1">Incluir código de país sin el símbolo '+'.</p>
                     </div>
                 </div>
+            </div>
+
+            <div>
+                <h3 className="text-xl font-bold text-gray-800 mb-4">Plantilla de Mensaje de WhatsApp</h3>
+                 <div>
+                    <label htmlFor="whatsappMessageTemplate" className="block text-sm font-medium text-gray-700">Mensaje de Pedido</label>
+                    <textarea
+                        id="whatsappMessageTemplate"
+                        name="whatsappMessageTemplate"
+                        value={formData.whatsappMessageTemplate}
+                        onChange={handleChange}
+                        rows={6}
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 font-mono text-sm"
+                        required
+                    />
+                    <p className="text-xs text-gray-500 mt-2">
+                        Usa estas variables para autocompletar la información del pedido: <br/>
+                        <code className="bg-gray-200 px-1 rounded">{`{{RESTAURANT_NAME}}`}</code>, <code className="bg-gray-200 px-1 rounded">{`{{DATOS_CLIENTE}}`}</code>, <code className="bg-gray-200 px-1 rounded">{`{{RESUMEN_PEDIDO}}`}</code>, <code className="bg-gray-200 px-1 rounded">{`{{NOTAS}}`}</code>, <code className="bg-gray-200 px-1 rounded">{`{{TOTAL}}`}</code>
+                    </p>
+                 </div>
             </div>
 
             <div>

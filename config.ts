@@ -12,6 +12,7 @@ export interface RestaurantConfig {
   name: string;
   whatsappNumber: string;
   adminPassword?: string; // La contraseña es ahora parte de la configuración
+  whatsappMessageTemplate: string;
   theme: {
     'primary-50': string;
     'primary-100': string;
@@ -31,6 +32,10 @@ export const defaultRestaurantConfig: RestaurantConfig = {
   // Información del Restaurante
   name: 'Tu Restaurante',
   whatsappNumber: '1122334455', // Código de país sin '+' seguido del número
+
+  // Plantilla de Mensaje de WhatsApp
+  whatsappMessageTemplate: `¡Hola {{RESTAURANT_NAME}}! Quisiera hacer el siguiente pedido:\n\n{{DATOS_CLIENTE}}\n\n{{RESUMEN_PEDIDO}}\n\n{{NOTAS}}\n\n*Total: {{TOTAL}}*`,
+
 
   // Tema de Colores por defecto (Naranja/Ámbar)
   theme: {

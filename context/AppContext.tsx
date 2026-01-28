@@ -62,7 +62,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             ...defaultRestaurantConfig,
             name: data.name,
             whatsappNumber: data.whatsappNumber,
-            adminPassword: data.adminPassword
+            adminPassword: data.adminPassword,
+            whatsappMessageTemplate: defaultRestaurantConfig.whatsappMessageTemplate,
         };
         setConfig(newConfig);
         setMenuItems(newConfig.menu);
