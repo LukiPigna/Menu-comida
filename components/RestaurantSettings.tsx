@@ -1,11 +1,33 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAppContext } from '../context/AppContext';
 import type { RestaurantConfig } from '../config';
+
+const WhatsAppMessagePreview: React.FC<{ template: string, restaurantName: string }> = ({ template, restaurantName }) => {
+    const customerData = `*DATOS DEL CLIENTE*\n▪️ *Tipo:* Delivery\n▪️ *Nombre:* Juan Pérez\n▪️ *Dirección:* Av. Siempreviva 742\n▪️ *Método de Pago:* Efectivo`;
+    const orderSummary = `*RESUMEN DEL PEDIDO*\n- 2x Hamburguesa de Ejemplo ($17.00)\n- 1x Ensalada de Ejemplo ($7.00)`;
+    const notesSection = `*NOTAS ADICIONALES:*\nSin pepinillos, por favor.`;
+    const total = `$24.00`;
+
+    const formattedMessage = template
+        .replace('{{RESTAURANT_NAME}}', restaurantName)
+        .replace('{{DATOS_CLIENTE}}', customerData)
+        .replace('{{RESUMEN_PEDIDO}}', orderSummary)
+        .replace('{{NOTAS}}', notesSection)
+        .replace('{{TOTAL}}', total);
+
+    return (
+        <div className="mt-4 p-4 rounded-lg bg-[#E7FFDB] w-full max-w-md mx-auto shadow-inner">
+            <p className="text-sm text-gray-800" style={{ whiteSpace: 'pre-wrap' }}>{formattedMessage}</p>
+        </div>
+    );
+};
+
 
 const RestaurantSettings: React.FC = () => {
     const { config, updateConfig, showToast } = useAppContext();
     const [formData, setFormData] = useState(config);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
         setFormData(config);
@@ -29,6 +51,23 @@ const RestaurantSettings: React.FC = () => {
             }
         }));
     };
+    
+    const handleInsertPlaceholder = (placeholder: string) => {
+        if (!textareaRef.current) return;
+        const textarea = textareaRef.current;
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const text = textarea.value;
+        const newText = text.substring(0, start) + placeholder + text.substring(end);
+        
+        setFormData(prev => ({ ...prev, whatsappMessageTemplate: newText }));
+        
+        // Focus and set cursor position after insertion
+        setTimeout(() => {
+            textarea.focus();
+            textarea.selectionStart = textarea.selectionEnd = start + placeholder.length;
+        }, 0);
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -37,6 +76,14 @@ const RestaurantSettings: React.FC = () => {
     };
     
     if (!formData) return null;
+
+    const placeholders = [
+        '{{RESTAURANT_NAME}}',
+        '{{DATOS_CLIENTE}}',
+        '{{RESUMEN_PEDIDO}}',
+        '{{NOTAS}}',
+        '{{TOTAL}}'
+    ];
 
     return (
         <form onSubmit={handleSubmit} className="space-y-8">
@@ -72,27 +119,40 @@ const RestaurantSettings: React.FC = () => {
                 </div>
             </div>
 
-            <div>
+            <div className="border-t pt-8">
                 <h3 className="text-xl font-bold text-gray-800 mb-4">Plantilla de Mensaje de WhatsApp</h3>
                  <div>
-                    <label htmlFor="whatsappMessageTemplate" className="block text-sm font-medium text-gray-700">Mensaje de Pedido</label>
+                    <label htmlFor="whatsappMessageTemplate" className="block text-sm font-medium text-gray-700">Editor de Mensaje</label>
+                     <div className="mt-2 flex flex-wrap gap-2">
+                        {placeholders.map(p => (
+                            <button
+                                type="button"
+                                key={p}
+                                onClick={() => handleInsertPlaceholder(p)}
+                                className="bg-primary-100 text-primary-800 text-xs font-semibold px-2 py-1 rounded-full hover:bg-primary-200 transition-colors"
+                            >
+                                {p}
+                            </button>
+                        ))}
+                    </div>
                     <textarea
+                        ref={textareaRef}
                         id="whatsappMessageTemplate"
                         name="whatsappMessageTemplate"
                         value={formData.whatsappMessageTemplate}
                         onChange={handleChange}
-                        rows={6}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 font-mono text-sm"
+                        rows={8}
+                        className="mt-2 block w-full border border-gray-300 rounded-md shadow-sm p-2 font-mono text-sm"
                         required
                     />
-                    <p className="text-xs text-gray-500 mt-2">
-                        Usa estas variables para autocompletar la información del pedido: <br/>
-                        <code className="bg-gray-200 px-1 rounded">{`{{RESTAURANT_NAME}}`}</code>, <code className="bg-gray-200 px-1 rounded">{`{{DATOS_CLIENTE}}`}</code>, <code className="bg-gray-200 px-1 rounded">{`{{RESUMEN_PEDIDO}}`}</code>, <code className="bg-gray-200 px-1 rounded">{`{{NOTAS}}`}</code>, <code className="bg-gray-200 px-1 rounded">{`{{TOTAL}}`}</code>
-                    </p>
+                    <div className="mt-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Vista Previa del Mensaje</label>
+                        <WhatsAppMessagePreview template={formData.whatsappMessageTemplate} restaurantName={formData.name} />
+                    </div>
                  </div>
             </div>
 
-            <div>
+            <div className="border-t pt-8">
                 <h3 className="text-xl font-bold text-gray-800 mb-4">Personalización de Colores</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="flex items-center space-x-4">
