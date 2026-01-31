@@ -2,19 +2,38 @@
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+# Menú digital (React + Vite)
 
-This contains everything you need to run your app locally.
+Menú de restaurante minimalista:
+- muestra categorías y productos
+- carrito
+- envío del pedido por WhatsApp
+- panel de administración para editar datos del restaurante y el menú
 
-View your app in AI Studio: https://ai.studio/apps/drive/16QNIJHWYHnQoLEPwx3sdTRReW0tvVm2n
+> Nota: esta app no depende de Gemini/AI Studio. Es un proyecto frontend normal.
 
-## Run Locally
+## Requisitos
+- Node.js (recomendado: LTS)
 
-**Prerequisites:**  Node.js
+## Correr local
+```bash
+npm install
+npm run dev
+```
 
+Luego abrí: http://localhost:3000
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Build
+```bash
+npm run build
+npm run preview
+```
+
+## Configuración del restaurante
+La configuración por defecto vive en `config.ts`.
+En el panel de administración podés modificar:
+- nombre
+- WhatsApp
+- logo
+- colores
+- menú
