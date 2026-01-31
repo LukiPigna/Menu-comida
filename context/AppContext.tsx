@@ -5,6 +5,7 @@ import type { RestaurantConfig } from '../config';
 import { LOCAL_STORAGE_MENU_KEY, LOCAL_STORAGE_CART_KEY, LOCAL_STORAGE_CONFIG_KEY } from '../constants';
 import useLocalStorage from '../hooks/useLocalStorage';
 import { defaultRestaurantConfig } from '../config';
+import { loadBootstrapMenu, loadBootstrapRestaurantConfig, type RestaurantBootstrapConfig } from '../src/bootstrap';
 
 // Función para aplicar el tema a la UI
 const applyTheme = (theme: RestaurantConfig['theme']) => {
@@ -16,8 +17,14 @@ const applyTheme = (theme: RestaurantConfig['theme']) => {
 
 interface AppContextType {
     config: RestaurantConfig | null;
+    /** Config que se carga desde `public/config/restaurant.json` (si existe). */
+    bootstrapRestaurantConfig: RestaurantBootstrapConfig | null;
+    /** Menú que se carga desde `public/config/menu.json` (si existe). */
+    bootstrapMenu: MenuItem[] | null;
+
     initializeConfig: (data: Pick<RestaurantConfig, 'name' | 'whatsappNumber' | 'adminPassword'>) => void;
     updateConfig: (newConfig: Partial<RestaurantConfig>) => void;
+
     menuItems: MenuItem[];
     cartItems: CartItem[];
     isAdminAuthenticated: boolean;
@@ -48,6 +55,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const [toastMessage, setToastMessage] = useState('');
     const [isToastVisible, setIsToastVisible] = useState(false);
 
+    const [bootstrapRestaurantConfig, setBootstrapRestaurantConfig] = useState<RestaurantBootstrapConfig | null>(null);
+    const [bootstrapMenu, setBootstrapMenu] = useState<MenuItem[] | null>(null);
+
+    // Carga bootstrap (por archivo) para que sea fácil personalizar por restaurante
+    useEffect(() => {
+        (async () => {
+            const [restaurant, menu] = await Promise.all([
+                loadBootstrapRestaurantConfig(),
+                loadBootstrapMenu(),
+            ]);
+            setBootstrapRestaurantConfig(restaurant);
+            setBootstrapMenu(menu);
+        })();
+    }, []);
+
     useEffect(() => {
         if (config) {
             applyTheme(config.theme);
@@ -57,16 +79,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
     }, [config]);
 
+    // Si todavía no hay config guardada, inicializamos el menú visible con el bootstrap (si existe)
+    useEffect(() => {
+        if (!config && bootstrapMenu && menuItems.length === 0) {
+            setMenuItems(bootstrapMenu);
+        }
+    }, [config, bootstrapMenu, menuItems.length, setMenuItems]);
+
     const initializeConfig = (data: Pick<RestaurantConfig, 'name' | 'whatsappNumber' | 'adminPassword'>) => {
+        const base = bootstrapRestaurantConfig ?? defaultRestaurantConfig;
+        const initialMenu = bootstrapMenu ?? base.menu ?? [];
+
         const newConfig: RestaurantConfig = {
             ...defaultRestaurantConfig,
+            ...base,
             name: data.name,
             whatsappNumber: data.whatsappNumber,
             adminPassword: data.adminPassword,
-            whatsappMessageTemplate: defaultRestaurantConfig.whatsappMessageTemplate,
         };
+
         setConfig(newConfig);
-        setMenuItems(newConfig.menu);
+        setMenuItems(initialMenu);
         setIsAdminAuthenticated(true); // Auto-login after setup
     };
 
@@ -147,6 +180,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const value = {
         config,
+        bootstrapRestaurantConfig,
+        bootstrapMenu,
         initializeConfig,
         updateConfig,
         menuItems,

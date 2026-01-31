@@ -1,17 +1,33 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { LockIcon } from './icons/LockIcon';
 
 const AdminSetup: React.FC = () => {
+    const { initializeConfig, bootstrapRestaurantConfig } = useAppContext();
+
     const [formData, setFormData] = useState({
-        name: '',
-        whatsappNumber: '',
+        name: bootstrapRestaurantConfig?.name ?? '',
+        whatsappNumber: bootstrapRestaurantConfig?.whatsappNumber ?? '',
         password: '',
         confirmPassword: ''
     });
     const [error, setError] = useState('');
-    const { initializeConfig } = useAppContext();
+
+    // Si llega bootstrap después del primer render, precargamos si el usuario todavía no tocó el form.
+    useEffect(() => {
+        if (!bootstrapRestaurantConfig) return;
+        setFormData(prev => {
+            const shouldAutofillName = prev.name.trim().length === 0;
+            const shouldAutofillWhatsapp = prev.whatsappNumber.trim().length === 0;
+            if (!shouldAutofillName && !shouldAutofillWhatsapp) return prev;
+            return {
+                ...prev,
+                name: shouldAutofillName ? bootstrapRestaurantConfig.name : prev.name,
+                whatsappNumber: shouldAutofillWhatsapp ? bootstrapRestaurantConfig.whatsappNumber : prev.whatsappNumber,
+            };
+        });
+    }, [bootstrapRestaurantConfig]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;

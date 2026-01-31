@@ -11,7 +11,7 @@ import type { MenuItem } from './types';
 export interface RestaurantConfig {
   name: string;
   whatsappNumber: string;
-  adminPassword?: string; // La contraseña es ahora parte de la configuración
+  adminPassword?: string; // Se guarda en el navegador (frontend).
   whatsappMessageTemplate: string;
   logoUrl: string; // URL para el logo del restaurante
   headerTextAlignment: 'left' | 'center'; // Alineación del texto/logo en la cabecera
@@ -27,45 +27,34 @@ export interface RestaurantConfig {
     'primary-800': string;
     'primary-900': string;
   };
-  menu: MenuItem[];
+  /**
+   * Menú inicial.
+   * Nota: el menú “real” lo mantenemos en `menuItems` (localStorage),
+   * pero dejamos este campo para bootstrap/import.
+   */
+  menu?: MenuItem[];
 }
 
+/**
+ * Fallback local: si no existe `public/config/restaurant.json` y/o `public/config/menu.json`.
+ */
 export const defaultRestaurantConfig: RestaurantConfig = {
-  // Información del Restaurante
   name: 'Tu Restaurante',
-  whatsappNumber: '1122334455', // Código de país sin '+' seguido del número
-  logoUrl: '', // Por defecto no hay logo
-  headerTextAlignment: 'left', // Por defecto, alineado a la izquierda
-
-  // Plantilla de Mensaje de WhatsApp
+  whatsappNumber: '5491122334455',
+  logoUrl: '',
+  headerTextAlignment: 'left',
   whatsappMessageTemplate: `¡Hola {{RESTAURANT_NAME}}! Quisiera hacer el siguiente pedido:\n\n{{DATOS_CLIENTE}}\n\n{{RESUMEN_PEDIDO}}\n\n{{NOTAS}}\n\n*Total: {{TOTAL}}*`,
-
-
-  // Tema de Colores por defecto (Naranja/Ámbar)
   theme: {
     'primary-50': '#fffbeb',
     'primary-100': '#fef3c7',
     'primary-200': '#fde68a',
     'primary-300': '#fcd34d',
     'primary-400': '#fbbf24',
-    'primary-500': '#f59e0b', // Color principal para botones y acentos
-    'primary-600': '#d97706', // Color para hover/estados activos
+    'primary-500': '#f59e0b',
+    'primary-600': '#d97706',
     'primary-700': '#b45309',
     'primary-800': '#92400e',
-    'primary-900': '#78350f',
+    'primary-900': '#78350f'
   },
-
-  // Menú de ejemplo
-  menu: [
-    { 
-        id: '1', 
-        name: 'Hamburguesa de Ejemplo', 
-        description: 'Personaliza este menú desde el panel de administración.', 
-        price: 8.50, 
-        category: 'Principales', 
-        imageUrl: 'https://picsum.photos/id/1060/400/300',
-    },
-    { id: '2', name: 'Pizza de Ejemplo', description: 'Usa la contraseña que creaste para ingresar.', price: 10.00, category: 'Principales', imageUrl: 'https://picsum.photos/id/292/400/300' },
-    { id: '3', name: 'Ensalada de Ejemplo', description: 'Puedes cambiar los colores y el logo.', price: 7.00, category: 'Entradas', imageUrl: 'https://picsum.photos/id/201/400/300' },
-  ]
+  menu: []
 };

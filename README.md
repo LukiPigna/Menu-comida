@@ -29,11 +29,14 @@ npm run build
 npm run preview
 ```
 
-## Configuración del restaurante
-La configuración por defecto vive en `config.ts`.
-En el panel de administración podés modificar:
-- nombre
-- WhatsApp
-- logo
-- colores
-- menú
+## Personalización por restaurante (sin tocar código)
+Este repo está preparado para que cada restaurante tenga su menú con solo editar archivos JSON.
+
+Editá:
+- `public/config/restaurant.json` (datos, logo, colores, plantilla WhatsApp)
+- `public/config/menu.json` (productos)
+
+La primera vez que abras la web, el setup de admin se precarga con esos datos. Luego el dueño puede editar desde el panel de administración (se guarda en el navegador).
+
+## Configuración (fallback)
+Si faltan esos JSON, se usa un fallback en `config.ts`.

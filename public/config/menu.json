@@ -1,0 +1,26 @@
+[
+  {
+    "id": "1",
+    "name": "Hamburguesa de Ejemplo",
+    "description": "Personaliza este menú editando public/config/menu.json",
+    "price": 8.5,
+    "category": "Principales",
+    "imageUrl": "https://picsum.photos/id/1060/400/300"
+  },
+  {
+    "id": "2",
+    "name": "Pizza de Ejemplo",
+    "description": "Podés agregar categorías y productos libremente.",
+    "price": 10,
+    "category": "Principales",
+    "imageUrl": "https://picsum.photos/id/292/400/300"
+  },
+  {
+    "id": "3",
+    "name": "Ensalada de Ejemplo",
+    "description": "Este proyecto es estático: podés desplegarlo en Vercel/Netlify y cambiar el JSON por restaurante.",
+    "price": 7,
+    "category": "Entradas",
+    "imageUrl": "https://picsum.photos/id/201/400/300"
+  }
+]
